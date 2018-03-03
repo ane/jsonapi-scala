@@ -35,17 +35,17 @@ object ResourceLinkage {
   final case class ToOne(resource: Option[ResourceIdentifierObject]) extends ResourceLinkage
   final case class ToMany(resources: Set[ResourceIdentifierObject])  extends ResourceLinkage
 
-  implicit object ResourceLinkageJsonFormat extends JsonFormat[ResourceLinkage] {
-    override def write(obj: ResourceLinkage): JsValue = obj match {
-      case ToOne(None)           => JsNull
-      case ToOne(Some(resource)) => resource.toJson
-      case ToMany(resources)     => JsArray(resources.map(_.toJson).toVector)
+  implicit object ResourceLinkageJsonFormat extends JsonModelFormat[ResourceLinkage] {
+    override def write(obj: ResourceLinkage): Json = obj match {
+      case ToOne(None)           => JsonNull
+      case ToOne(Some(resource)) => resource.toJsonModel
+      case ToMany(resources)     => JsonArray(resources.map(_.toJsonModel).toVector)
     }
 
-    override def read(json: JsValue): ResourceLinkage = json match {
-      case JsNull      => ToOne(None)
-      case o: JsObject => ToOne(Some(json.convertTo[ResourceIdentifierObject]))
-      case a: JsArray  => ToMany(json.convertTo[Set[ResourceIdentifierObject]])
+    override def read(json: Json): ResourceLinkage = json match {
+      case JsonNull      => ToOne(None)
+      case o: JsObject => ToOne(Some(json.as[ResourceIdentifierObject]))
+      case a: JsonArray  => ToMany(json.as[Set[ResourceIdentifierObject]])
       case invalid     => deserializationError(s"Invalid resource linkage: ‘$invalid’")
     }
   }

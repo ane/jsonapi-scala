@@ -26,18 +26,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.qvantel.jsonapi
 
-import _root_.spray.json._
-
 package object model {
-  type MetaObject    = Map[String, JsValue]
+  type MetaObject    = Map[String, Json]
   type Links         = Map[String, Link]
-  type Attributes    = Map[String, JsValue]
+  type Attributes    = Map[String, Json]
   type Relationships = Map[String, RelationshipObject]
 
-  final implicit class JsonMapOps(val underlying: Map[String, JsValue]) extends AnyVal {
-    @inline def getAs[A](name: String)(implicit r: JsonReader[Option[A]]): Option[A] =
-      underlying.get(name).flatMap(_.convertTo[Option[A]])
+  final implicit class JsonMapOps(val underlying: Map[String, Json]) extends AnyVal {
+    @inline def getAs[A](name: String)(implicit r: JsonModelReader[Option[A]]): Option[A] =
+      underlying.get(name).flatMap(_.as[Option[A]])
 
-    @inline def getAs[A](name: Symbol)(implicit r: JsonReader[Option[A]]): Option[A] = getAs(name.name)
+    @inline def getAs[A](name: Symbol)(implicit r: JsonModelReader[Option[A]]): Option[A] = getAs(name.name)
   }
+
+  def deserializationException(reason: String, explanation: String = null, throwable: Throwable = null) =
+    throw JsonDeserializationException(reason, explanation, throwable)
+  def serializationException(reason: String, explanation: String = null, throwable: Throwable = null) =
+    throw JsonSerializationException(reason, explanation, throwable)
+
+  implicit class pimpedJsonWriter[T](obj: T)(implicit F: JsonModelWriter[T]) {
+    def toJsonModel: Json = F.write(obj)
+  }
+
+  implicit object mapJsonModelInstance extends JsonModelWriter[Map[String, Json]] {
+    override def write(obj: Map[String, Json]): Json =
+  }
+}
+
+package model {
+  case class JsonDeserializationException(reason: String, explanation: String, throwable: Throwable) extends RuntimeException(s"JSON deserialization error: $reason, caused by $explanation", throwable)
+  case class JsonSerializationException(reason: String, explanation: String, throwable: Throwable) extends RuntimeException(s"JSON deserialization error: $reason, caused by $explanation", throwable)
 }

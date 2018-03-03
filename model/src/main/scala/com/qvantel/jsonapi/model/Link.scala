@@ -41,30 +41,30 @@ object Link {
 
   val uriConfig = com.qvantel.jsonapi.uriConfig
 
-  implicit object LinkJsonFormat extends JsonFormat[Link] {
-    override def write(obj: Link): JsValue = obj match {
-      case Url(href) => JsString(href.toString(uriConfig))
+  implicit object LinkJsonFormat extends JsonModelFormat[Link] {
+    override def write(obj: Link): Json = obj match {
+      case Url(href) => JsonString(href.toString(uriConfig))
       case LinkObject(href, meta) =>
         if (meta.nonEmpty) {
-          JsObject("href" -> href.toString(uriConfig).toJson, "meta" -> meta.toJson)
+          JsonObject("href" -> href.toString(uriConfig).toJsonModel, "meta" -> meta.toJsonModel)
         } else {
-          JsObject("href" -> href.toString(uriConfig).toJson)
+          JsonObject("href" -> href.toString(uriConfig).toJsonModel)
         }
     }
 
-    override def read(json: JsValue): Link = json match {
-      case JsString(href) => Url(parse(href)(uriConfig))
-      case JsObject(fields) =>
+    override def read(json: Json): Link = json match {
+      case JsonString(href) => Url(parse(href)(uriConfig))
+      case JsonObject(fields) =>
         LinkObject(
           href = parse(
-            fields.get("href").map(_.convertTo[String]).getOrElse(deserializationError("Expected ‘href’ in Link")))(
+            fields.get("href").map(_.as[String]).getOrElse(deserializationError("Expected ‘href’ in Link")))(
             uriConfig),
-          meta = fields.get("meta").map(_.convertTo[MetaObject]).getOrElse(Map.empty)
+          meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty)
         )
       case invalid => deserializationError(s"Expected Link as JsString or JsObject, got ‘$invalid’")
     }
   }
 
-  def convertToLinks: (JsValue) => Links =
-    _.convertTo[Map[String, JsValue]].filterNot(_._2 == JsNull).map(entry => (entry._1, entry._2.convertTo[Link]))
+  def convertToLinks: (Json) => Links =
+    _.as[Map[String, Json]].filterNot(_._2 == JsNull).map(entry => (entry._1, entry._2.as[Link]))
 }

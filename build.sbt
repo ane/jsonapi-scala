@@ -116,8 +116,6 @@ val scala211 = Seq(
 
 description in ThisBuild := "jsonapi.org scala implementation"
 
-version in ThisBuild := "8.0.0"
-
 startYear in ThisBuild := Some(2015)
 
 organization in ThisBuild := "com.qvantel"
@@ -244,6 +242,23 @@ lazy val spray = (project in file("spray"))
       "io.spray"          %% "spray-routing-shapeless23" % "1.3.4"  % "test"
     ) ++ testDeps
   )
+
+val circeVersion = "0.9.1"
+lazy val circe = (project in file("circe"))
+.dependsOn(core, model)
+.settings(
+  name := "jsonapi-scala-circe",
+  description := "Circe backend for jsonapi-scala",
+  scalaVersion := "2.11.12",
+  crossScalaVersions := Seq("2.11.12"),
+  scalacOptions ++= scala211,
+  libraryDependencies ++= Seq(
+    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    "io.circe" %% "circe-core" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion,
+    "io.circe" %% "circe-parser" % circeVersion
+  ) ++ testDeps
+)
 
 lazy val akkaClient = (project in file("akka-client"))
   .dependsOn(core)

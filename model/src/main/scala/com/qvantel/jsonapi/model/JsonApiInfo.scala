@@ -32,17 +32,17 @@ import _root_.spray.json._
 final case class JsonApiInfo(version: Option[String], meta: MetaObject)
 
 object JsonApiInfo {
-  implicit object JsonApiInfoJsonFormat extends RootJsonFormat[JsonApiInfo] {
+  implicit object JsonApiInfoJsonFormat extends JsonModelFormat[JsonApiInfo] {
     override def write(obj: JsonApiInfo): JsValue = obj match {
-      case JsonApiInfo(None, meta) if meta.isEmpty          => JsObject.empty
-      case JsonApiInfo(Some(version), meta) if meta.isEmpty => JsObject("version" -> version.toJson)
-      case JsonApiInfo(Some(version), meta)                 => JsObject("version" -> version.toJson, "meta" -> meta.toJson)
+      case JsonApiInfo(None, meta) if meta.isEmpty          => JsonObject.empty
+      case JsonApiInfo(Some(version), meta) if meta.isEmpty => JsonObject("version" -> version.toJsonModel)
+      case JsonApiInfo(Some(version), meta)                 => JsonObject("version" -> version.toJsonModel, "meta" -> meta.toJsonModel)
     }
 
     override def read(json: JsValue): JsonApiInfo = {
-      val fields = json.asJsObject.fields
-      JsonApiInfo(version = fields.get("version").flatMap(_.convertTo[Option[String]]),
-                  meta = fields.get("meta").map(_.convertTo[MetaObject]).getOrElse(Map.empty))
+      val fields = json.asJsonObject.fields
+      JsonApiInfo(version = fields.get("version").flatMap(_.as[Option[String]]),
+                  meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty))
     }
   }
 }

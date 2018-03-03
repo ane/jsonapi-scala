@@ -32,21 +32,21 @@ import _root_.spray.json._
 final case class RelationshipObject(links: Links, data: Option[ResourceLinkage], meta: MetaObject)
 
 object RelationshipObject {
-  implicit object RelationshipObjectJsonFormat extends RootJsonFormat[RelationshipObject] {
-    override def write(obj: RelationshipObject): JsValue = {
-      val builder = Map.newBuilder[String, JsValue]
-      if (obj.links.nonEmpty) builder += "links" -> obj.links.toJson
-      if (obj.data.isDefined) builder += "data"  -> obj.data.toJson
-      if (obj.meta.nonEmpty) builder += "meta"   -> obj.meta.toJson
-      JsObject(builder.result())
+  implicit object RelationshipObjectJsonFormat extends JsonModelFormat[RelationshipObject] {
+    override def write(obj: RelationshipObject): Json = {
+      val builder = Map.newBuilder[String, Json]
+      if (obj.links.nonEmpty) builder += "links" -> obj.links.toJsonModel
+      if (obj.data.isDefined) builder += "data"  -> obj.data.toJsonModel
+      if (obj.meta.nonEmpty) builder += "meta"   -> obj.meta.toJsonModel
+      JsonObject(builder.result())
     }
 
-    override def read(json: JsValue): RelationshipObject = {
-      val fields = json.asJsObject.fields
+    override def read(json: Json): RelationshipObject = {
+      val fields = json.asJsonObject.fields
       RelationshipObject(
         links = fields.get("links").map(Link.convertToLinks).getOrElse(Map.empty),
-        data = fields.get("data").map(_.convertTo[ResourceLinkage]),
-        meta = fields.get("meta").map(_.convertTo[MetaObject]).getOrElse(Map.empty)
+        data = fields.get("data").map(_.as[ResourceLinkage]),
+        meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty)
       )
     }
   }

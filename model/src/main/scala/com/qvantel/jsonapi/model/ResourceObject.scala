@@ -37,31 +37,31 @@ final case class ResourceObject(id: Option[String],
                                 meta: MetaObject)
 
 object ResourceObject {
-  implicit object ResourceObjectJsonFormat extends RootJsonFormat[ResourceObject] {
-    override def write(obj: ResourceObject): JsValue = {
-      val builder = Map.newBuilder[String, JsValue]
-      obj.id.foreach(x => builder += "id" -> x.toJson)
-      builder += "type" -> obj.`type`.toJson
-      if (obj.attributes.nonEmpty) builder += "attributes"       -> obj.attributes.toJson
-      if (obj.relationships.nonEmpty) builder += "relationships" -> obj.relationships.toJson
-      if (obj.links.nonEmpty) builder += "links"                 -> obj.links.toJson
-      if (obj.meta.nonEmpty) builder += "meta"                   -> obj.meta.toJson
-      JsObject(builder.result())
+  implicit object ResourceObjectJsonFormat extends JsonModelFormat[ResourceObject] {
+    override def write(obj: ResourceObject): Json = {
+      val builder = Map.newBuilder[String, Json]
+      obj.id.foreach(x => builder += "id" -> x.toJsonModel)
+      builder += "type" -> obj.`type`.toJsonModel
+      if (obj.attributes.nonEmpty) builder += "attributes"       -> obj.attributes.toJsonModel
+      if (obj.relationships.nonEmpty) builder += "relationships" -> obj.relationships.toJsonModel
+      if (obj.links.nonEmpty) builder += "links"                 -> obj.links.toJsonModel
+      if (obj.meta.nonEmpty) builder += "meta"                   -> obj.meta.toJsonModel
+      JsonObject(builder.result())
     }
 
-    override def read(json: JsValue): ResourceObject = {
-      val fields = json.asJsObject.fields
+    override def read(json: Json): ResourceObject = {
+      val fields = json.asJsonObject.fields
 
       ResourceObject(
-        id = fields.get("id").flatMap(_.convertTo[Option[String]]),
+        id = fields.get("id").flatMap(_.as[Option[String]]),
         `type` = fields
           .get("type")
-          .map(_.convertTo[String])
+          .map(_.as[String])
           .getOrElse(deserializationError(s"No ‘type’ field in resource object")),
-        attributes = fields.get("attributes").map(_.convertTo[Map[String, JsValue]]).getOrElse(Map.empty),
-        relationships = fields.get("relationships").map(_.convertTo[Relationships]).getOrElse(Map.empty),
+        attributes = fields.get("attributes").map(_.as[Map[String, Json]]).getOrElse(Map.empty),
+        relationships = fields.get("relationships").map(_.as[Relationships]).getOrElse(Map.empty),
         links = fields.get("links").map(Link.convertToLinks).getOrElse(Map.empty),
-        meta = fields.get("meta").map(_.convertTo[MetaObject]).getOrElse(Map.empty)
+        meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty)
       )
     }
   }

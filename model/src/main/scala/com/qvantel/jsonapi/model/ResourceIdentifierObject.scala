@@ -32,25 +32,25 @@ import _root_.spray.json._
 final case class ResourceIdentifierObject(id: String, `type`: String, meta: MetaObject)
 
 object ResourceIdentifierObject {
-  implicit object ResourceIdentifierObjectJsonFormat extends RootJsonFormat[ResourceIdentifierObject] {
-    override def write(obj: ResourceIdentifierObject): JsValue = obj match {
-      case ResourceIdentifierObject(id, t, meta) if meta.isEmpty => JsObject("id" -> id.toJson, "type" -> t.toJson)
+  implicit object ResourceIdentifierObjectJsonFormat extends JsonModelFormat[ResourceIdentifierObject] {
+    override def write(obj: ResourceIdentifierObject): Json = obj match {
+      case ResourceIdentifierObject(id, t, meta) if meta.isEmpty => JsonObject("id" -> id.toJsonModel, "type" -> t.toJsonModel)
       case ResourceIdentifierObject(id, t, meta) =>
-        JsObject("id" -> id.toJson, "type" -> t.toJson, "meta" -> meta.toJson)
+        JsonObject("id" -> id.toJsonModel, "type" -> t.toJsonModel, "meta" -> meta.toJsonModel)
     }
 
-    override def read(json: JsValue): ResourceIdentifierObject = {
-      val fields = json.asJsObject.fields
+    override def read(json: Json): ResourceIdentifierObject = {
+      val fields = json.asJsonObject.fields
       ResourceIdentifierObject(
         id = fields
           .get("id")
-          .map(_.convertTo[String])
+          .map(_.as[String])
           .getOrElse(deserializationError(s"Expected an ‘id’ field in resource identifier object")),
         `type` = fields
           .get("type")
-          .map(_.convertTo[String])
+          .map(_.as[String])
           .getOrElse(deserializationError(s"Expected an ‘type’ field in resource identifier object")),
-        meta = fields.get("meta").map(_.convertTo[MetaObject]).getOrElse(Map.empty)
+        meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty)
       )
     }
   }

@@ -33,18 +33,18 @@ final case class ErrorSource(pointer: Option[String], parameter: Option[String])
 
 object ErrorSource {
   implicit object ErrorSourceJsonFormat extends RootJsonFormat[ErrorSource] {
-    override def write(obj: ErrorSource): JsValue = obj match {
-      case ErrorSource(None, None)            => JsObject.empty
-      case ErrorSource(None, Some(parameter)) => JsObject("parameter" -> parameter.toJson)
-      case ErrorSource(Some(pointer), None)   => JsObject("pointer" -> pointer.toJson)
+    override def write(obj: ErrorSource): Json = obj match {
+      case ErrorSource(None, None)            => JsonObject.empty
+      case ErrorSource(None, Some(parameter)) => JsonObject("parameter" -> parameter.toJsonModel)
+      case ErrorSource(Some(pointer), None)   => JsonObject("pointer" -> pointer.toJsonModel)
       case ErrorSource(Some(pointer), Some(parameter)) =>
-        JsObject("pointer" -> pointer.toJson, "parameter" -> parameter.toJson)
+        JsonObject("pointer" -> pointer.toJsonModel, "parameter" -> parameter.toJsonModel)
     }
 
-    override def read(json: JsValue): ErrorSource = {
-      val fields = json.asJsObject.fields
-      ErrorSource(pointer = fields.get("pointer").flatMap(_.convertTo[Option[String]]),
-                  parameter = fields.get("parameter").flatMap(_.convertTo[Option[String]]))
+    override def read(json: Json): ErrorSource = {
+      val fields = json.asJsonObject.fields
+      ErrorSource(pointer = fields.get("pointer").flatMap(_.as[Option[String]]),
+                  parameter = fields.get("parameter").flatMap(_.as[Option[String]]))
     }
   }
 }
