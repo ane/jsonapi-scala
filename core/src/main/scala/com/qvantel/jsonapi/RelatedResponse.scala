@@ -26,7 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.qvantel.jsonapi
 
-import _root_.spray.json.{JsArray, JsNull, JsObject, JsValue, JsonPrinter, PrettyPrinter}
+import _root_.spray.json.{JsArray, JsNull, JsObject, JsValue, JsonPrinter => JsPrinter, PrettyPrinter}
 
 /** Used render proper related link response as specified by jsonapi spec
   * found at http://jsonapi.org/format/1.0/#fetching-resources
@@ -35,7 +35,7 @@ import _root_.spray.json.{JsArray, JsNull, JsObject, JsValue, JsonPrinter, Prett
   */
 sealed trait RelatedResponse[A] {
   def toResponse(implicit writer: JsonApiWriter[A],
-                 printer: JsonPrinter = PrettyPrinter,
+                 printer: JsPrinter = PrettyPrinter,
                  sorting: JsonApiSorting = JsonApiSorting.Unsorted): JsValue
 }
 
@@ -45,12 +45,12 @@ object RelatedResponse {
   private[this] object One {
     final class Empty[A] extends One[A] {
       def toResponse(implicit writer: JsonApiWriter[A],
-                     printer: JsonPrinter = PrettyPrinter,
+                     printer: JsPrinter = PrettyPrinter,
                      sorting: JsonApiSorting = JsonApiSorting.Unsorted): JsValue = JsObject("data" -> JsNull)
     }
     final case class Result[A](data: A) extends One[A] {
       def toResponse(implicit writer: JsonApiWriter[A],
-                     printer: JsonPrinter = PrettyPrinter,
+                     printer: JsPrinter = PrettyPrinter,
                      sorting: JsonApiSorting = JsonApiSorting.Unsorted): JsValue = rawOne(data)
     }
 
@@ -67,12 +67,12 @@ object RelatedResponse {
   private[this] object ToMany {
     final class Empty[A] extends Many[A] {
       def toResponse(implicit writer: JsonApiWriter[A],
-                     printer: JsonPrinter = PrettyPrinter,
+                     printer: JsPrinter = PrettyPrinter,
                      sorting: JsonApiSorting = JsonApiSorting.Unsorted): JsValue = JsObject("data" -> JsArray.empty)
     }
     final case class Result[A](data: List[A]) extends Many[A] {
       override def toResponse(implicit writer: JsonApiWriter[A],
-                              printer: JsonPrinter = PrettyPrinter,
+                              printer: JsPrinter = PrettyPrinter,
                               sorting: JsonApiSorting = JsonApiSorting.Unsorted): JsValue =
         rawCollection(data)
     }

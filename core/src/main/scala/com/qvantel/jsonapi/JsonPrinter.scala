@@ -1,4 +1,4 @@
-package com.qvantel.jsonapi.model
+package com.qvantel.jsonapi
 
 trait JsonPrinter {
   /**

@@ -28,18 +28,20 @@ package com.qvantel.jsonapi.model
 
 import _root_.spray.json.DefaultJsonProtocol._
 import _root_.spray.json._
+import com.qvantel.jsonapi.spray._
+import com.qvantel.jsonapi._
 
 final case class JsonApiInfo(version: Option[String], meta: MetaObject)
 
 object JsonApiInfo {
   implicit object JsonApiInfoJsonFormat extends JsonModelFormat[JsonApiInfo] {
-    override def write(obj: JsonApiInfo): JsValue = obj match {
+    override def write(obj: JsonApiInfo): Json = obj match {
       case JsonApiInfo(None, meta) if meta.isEmpty          => JsonObject.empty
       case JsonApiInfo(Some(version), meta) if meta.isEmpty => JsonObject("version" -> version.toJsonModel)
       case JsonApiInfo(Some(version), meta)                 => JsonObject("version" -> version.toJsonModel, "meta" -> meta.toJsonModel)
     }
 
-    override def read(json: JsValue): JsonApiInfo = {
+    override def read(json: Json): JsonApiInfo = {
       val fields = json.asJsonObject.fields
       JsonApiInfo(version = fields.get("version").flatMap(_.as[Option[String]]),
                   meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty))

@@ -1,9 +1,9 @@
 package com.qvantel.jsonapi.spray
 
-import com.qvantel.jsonapi.model._
 import org.specs2.mutable.Specification
 import _root_.spray.json.DefaultJsonProtocol._
 import _root_.spray.json._
+import com.qvantel.jsonapi._
 
 class SprayJsonModelSpec extends Specification {
   "SprayJsonModel" should {
@@ -30,6 +30,13 @@ class SprayJsonModelSpec extends Specification {
       val asd = obj.toJsonModel.as[Foo]
 
       asd must_== obj
+    }
+
+    "work with maps" in {
+      val foo = Map("asd" -> 1)
+      val bar = foo.toJsonModel.as[Map[String, Int]]
+
+      foo must_== bar
     }
   }
 }

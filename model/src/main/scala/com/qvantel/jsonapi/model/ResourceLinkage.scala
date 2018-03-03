@@ -28,6 +28,8 @@ package com.qvantel.jsonapi.model
 
 import _root_.spray.json.DefaultJsonProtocol._
 import _root_.spray.json._
+import com.qvantel.jsonapi._
+import com.qvantel.jsonapi.spray._
 
 sealed abstract class ResourceLinkage
 
@@ -37,13 +39,13 @@ object ResourceLinkage {
 
   implicit object ResourceLinkageJsonFormat extends JsonModelFormat[ResourceLinkage] {
     override def write(obj: ResourceLinkage): Json = obj match {
-      case ToOne(None)           => JsonNull
+      case ToOne(None)           => JsonNullable
       case ToOne(Some(resource)) => resource.toJsonModel
       case ToMany(resources)     => JsonArray(resources.map(_.toJsonModel).toVector)
     }
 
     override def read(json: Json): ResourceLinkage = json match {
-      case JsonNull      => ToOne(None)
+      case JsonNullable      => ToOne(None)
       case o: JsObject => ToOne(Some(json.as[ResourceIdentifierObject]))
       case a: JsonArray  => ToMany(json.as[Set[ResourceIdentifierObject]])
       case invalid     => deserializationError(s"Invalid resource linkage: ‘$invalid’")

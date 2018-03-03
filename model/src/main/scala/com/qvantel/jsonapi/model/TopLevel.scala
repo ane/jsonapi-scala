@@ -28,9 +28,9 @@ package com.qvantel.jsonapi.model
 
 import _root_.spray.json.DefaultJsonProtocol._
 import _root_.spray.json._
-
-import com.qvantel.jsonapi.JsonApiFormat
+import com.qvantel.jsonapi._
 import com.qvantel.jsonapi.model.TopLevel.IdType
+import com.qvantel.jsonapi.spray._
 
 sealed abstract class TopLevel {
   def meta: MetaObject
@@ -52,7 +52,7 @@ object TopLevel {
   @inline def mkResourceObjectMap(jsValue: Json): Map[IdType, ResourceObject] =
     jsValue match {
       case arr: JsonArray => arr.elements.map(json => mkResourceObjectTuple(json.as[ResourceObject])).toMap
-      case JsonNull       => Map.empty
+      case JsonNullable       => Map.empty
       case _            => deserializationError("included/data must be array or null")
     }
 
@@ -82,7 +82,7 @@ object TopLevel {
     @inline def mkResourceObjectMap(jsValue: Json): Map[IdType, ResourceObject] =
       jsValue match {
         case arr: JsonArray => arr.elements.map(json => mkResourceObjectTuple(json.as[ResourceObject])).toMap
-        case JsonNull       => Map.empty
+        case JsonNullable       => Map.empty
         case _            => deserializationError("included must be array or null")
       }
 
@@ -103,7 +103,7 @@ object TopLevel {
           .get("data")
           .flatMap(_ match {
             case d: JsonObject => Some(mkResourceObjectTuple(d.as[ResourceObject]))
-            case JsonNull      => None
+            case JsonNullable      => None
             case _           => deserializationError("data must be null or object")
           }),
         meta = fields.get("meta").map(_.as[MetaObject]).getOrElse(Map.empty),
@@ -118,7 +118,7 @@ object TopLevel {
     @inline private[this] def mkResourceObjectMap(jsValue: Json): Map[IdType, ResourceObject] =
       jsValue match {
         case arr: JsonArray => arr.elements.map(json => mkResourceObjectTuple(json.as[ResourceObject])).toMap
-        case JsonNull       => Map.empty
+        case JsonNullable       => Map.empty
         case _            => deserializationError("included/data must be array or null")
       }
 
@@ -182,7 +182,7 @@ object TopLevel {
       } getOrElse (fields.get("data") match {
         case Some(JsonArray(_))  => CollectionJsonFormat.read(json)
         case Some(JsonObject(_)) => SingleJsonFormat.read(json)
-        case Some(JsonNull)      => SingleJsonFormat.read(json)
+        case Some(JsonNullable)      => SingleJsonFormat.read(json)
         case None              => deserializationError(s"Missing ‘data’ in resource object")
         case invalid           => deserializationError(s"Invalid ‘data’ in resource object")
       })

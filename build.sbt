@@ -205,7 +205,7 @@ lazy val core = (project in file("core"))
   )
 
 lazy val model = (project in file("model"))
-  .dependsOn(core)
+  .dependsOn(core, `spray-json`)
   .settings(
     name := "jsonapi-scala-model",
     scalaVersion := "2.11.12",
@@ -245,20 +245,35 @@ lazy val spray = (project in file("spray"))
 
 val circeVersion = "0.9.1"
 lazy val circe = (project in file("circe"))
-.dependsOn(core, model)
-.settings(
-  name := "jsonapi-scala-circe",
-  description := "Circe backend for jsonapi-scala",
-  scalaVersion := "2.11.12",
-  crossScalaVersions := Seq("2.11.12"),
-  scalacOptions ++= scala211,
-  libraryDependencies ++= Seq(
-    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-    "io.circe" %% "circe-core" % circeVersion,
-    "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion
-  ) ++ testDeps
-)
+  .dependsOn(core)
+  .settings(
+    name := "jsonapi-scala-circe",
+    description := "Circe backend for jsonapi-scala",
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12"),
+    scalacOptions ++= scala211,
+    libraryDependencies ++= Seq(
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      "io.circe" %% "circe-core" % circeVersion,
+      "io.circe" %% "circe-generic" % circeVersion,
+      "io.circe" %% "circe-parser" % circeVersion
+    ) ++ testDeps
+  )
+
+lazy val `spray-json` = (project in file("spray-json"))
+  .dependsOn(core)
+  .settings(
+    name := "jsonapi-scala-circe",
+    description := "spray-json for jsonapi-scala",
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12"),
+    scalacOptions ++= scala211,
+    libraryDependencies ++= Seq(
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      "io.spray"         %% "spray-json"      % "1.3.2"
+    ) ++ testDeps
+  )
+
 
 lazy val akkaClient = (project in file("akka-client"))
   .dependsOn(core)

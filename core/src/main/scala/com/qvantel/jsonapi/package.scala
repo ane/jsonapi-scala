@@ -36,7 +36,7 @@ import _root_.spray.json.DefaultJsonProtocol._
 import com.netaporter.uri.config.UriConfig
 import com.netaporter.uri.encoding.percentEncode
 
-package object jsonapi {
+package object jsonapi extends JsonFormatInstances {
   type NameMangler = String => String
 
   val uriConfig = UriConfig(encoder = percentEncode ++ '/' ++ '"')
@@ -214,5 +214,21 @@ package object jsonapi {
         }
       }
     includes.flatMap(go(_, Set.empty, None))
+  }
+
+  implicit def pimpedJsonModelWriter[T](obj: T): PimpedAnyJsonModelWriter[T] = new PimpedAnyJsonModelWriter[T](obj)
+
+  def deserializationException(reason: String, explanation: String = null, throwable: Throwable = null) =
+    throw JsonDeserializationException(reason, explanation, throwable)
+  def serializationException(reason: String, explanation: String = null, throwable: Throwable = null) =
+    throw JsonSerializationException(reason, explanation, throwable)
+}
+
+package jsonapi {
+  case class JsonDeserializationException(reason: String, explanation: String, throwable: Throwable) extends RuntimeException(s"JSON deserialization error: $reason, caused by $explanation", throwable)
+  case class JsonSerializationException(reason: String, explanation: String, throwable: Throwable) extends RuntimeException(s"JSON deserialization error: $reason, caused by $explanation", throwable)
+
+  private[jsonapi] class PimpedAnyJsonModelWriter[T](obj: T) {
+    def toJsonModel(implicit W: JsonModelWriter[T]): Json = W.write(obj)
   }
 }

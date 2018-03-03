@@ -1,11 +1,11 @@
-package com.qvantel.jsonapi.model
+package com.qvantel.jsonapi
 
-import collection.immutable
+import scala.collection.immutable
 
 /**
   * An abstract representation of a JSON value that decouples
   * the model from any JSON backend, like Spray or Circe.
- *
+  *
   * @since 9.0.0
   */
 sealed trait Json {
@@ -36,14 +36,14 @@ sealed trait Json {
     * @tparam S the destination type
     * @return conversion of this value to S
     */
-  def to[S](implicit C: JsonConvertible[S]): S = C.fromJson(this)
+  def to[S](implicit C: JsonFormatSource[S]): S = C.fromJson(this)
 }
 
 object Json {
-  def from[S](s: S)(implicit C: JsonConvertible[S]): Json = C.toJsonRepr(s)
+  def from[S](s: S)(implicit C: JsonFormatSource[S]): Json = C.toJsonRepr(s)
 }
 
-trait JsonConvertible[S] {
+trait JsonFormatSource[S] {
   def toJsonRepr(source: S): Json
   def fromJson(json: Json): S
 }
@@ -55,7 +55,8 @@ final case class JsonObject(fields: Map[String, Json]) extends Json {
 }
 
 object JsonObject {
-  def apply(fields: (String, Json)*): JsonObject = new JsonObject(Map(fields: _*))
+  def empty: JsonObject                          = JsonObject(Map.empty[String, Json])
+  def apply(fields: (String, Json)*): JsonObject = JsonObject(Map(fields: _*))
 }
 
 final case class JsonArray(elements: Vector[Json]) extends Json {
@@ -74,4 +75,4 @@ final case class JsonBoolean(value: Boolean) extends Json {
   override def asJsonBoolean: JsonBoolean = this
 }
 
-final case object JsonNull extends Json
+final case object JsonNullable extends Json

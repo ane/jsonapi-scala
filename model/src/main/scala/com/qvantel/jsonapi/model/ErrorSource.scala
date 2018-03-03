@@ -28,11 +28,13 @@ package com.qvantel.jsonapi.model
 
 import _root_.spray.json.DefaultJsonProtocol._
 import _root_.spray.json._
+import com.qvantel.jsonapi._
+import com.qvantel.jsonapi.spray._
 
 final case class ErrorSource(pointer: Option[String], parameter: Option[String])
 
 object ErrorSource {
-  implicit object ErrorSourceJsonFormat extends RootJsonFormat[ErrorSource] {
+  implicit object ErrorSourceJsonFormat extends JsonModelFormat[ErrorSource] {
     override def write(obj: ErrorSource): Json = obj match {
       case ErrorSource(None, None)            => JsonObject.empty
       case ErrorSource(None, Some(parameter)) => JsonObject("parameter" -> parameter.toJsonModel)

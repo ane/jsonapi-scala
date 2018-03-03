@@ -26,6 +26,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.qvantel.jsonapi
 
+import _root_.spray.json._
+import com.qvantel.jsonapi._
+import _root_.spray.json.DefaultJsonProtocol._
+import com.qvantel.jsonapi.spray._
+
 package object model {
   type MetaObject    = Map[String, Json]
   type Links         = Map[String, Link]
@@ -38,22 +43,4 @@ package object model {
 
     @inline def getAs[A](name: Symbol)(implicit r: JsonModelReader[Option[A]]): Option[A] = getAs(name.name)
   }
-
-  def deserializationException(reason: String, explanation: String = null, throwable: Throwable = null) =
-    throw JsonDeserializationException(reason, explanation, throwable)
-  def serializationException(reason: String, explanation: String = null, throwable: Throwable = null) =
-    throw JsonSerializationException(reason, explanation, throwable)
-
-  implicit class pimpedJsonWriter[T](obj: T)(implicit F: JsonModelWriter[T]) {
-    def toJsonModel: Json = F.write(obj)
-  }
-
-  implicit object mapJsonModelInstance extends JsonModelWriter[Map[String, Json]] {
-    override def write(obj: Map[String, Json]): Json =
-  }
-}
-
-package model {
-  case class JsonDeserializationException(reason: String, explanation: String, throwable: Throwable) extends RuntimeException(s"JSON deserialization error: $reason, caused by $explanation", throwable)
-  case class JsonSerializationException(reason: String, explanation: String, throwable: Throwable) extends RuntimeException(s"JSON deserialization error: $reason, caused by $explanation", throwable)
 }

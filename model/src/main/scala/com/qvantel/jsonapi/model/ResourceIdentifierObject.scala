@@ -28,6 +28,8 @@ package com.qvantel.jsonapi.model
 
 import _root_.spray.json.DefaultJsonProtocol._
 import _root_.spray.json._
+import com.qvantel.jsonapi._
+import com.qvantel.jsonapi.spray._
 
 final case class ResourceIdentifierObject(id: String, `type`: String, meta: MetaObject)
 
